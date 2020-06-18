@@ -5,6 +5,7 @@ from event import urls as event_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("api", include("rest_framework.urls")),
     path("api/registration", include(registration_urls)),
-    path("api/event", include(event_urls))
+    path("api/event", include(event_urls)),
 ]

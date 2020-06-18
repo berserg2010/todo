@@ -8,4 +8,4 @@ class Event(models.Model):
     description = models.TextField()
     event_date = models.DateTimeField()
 
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)

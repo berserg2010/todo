@@ -9,10 +9,10 @@ from .serializers import EventSerializer
 
 
 class EventCreate(APIView):
-    authentication_classes = (TokenAuthentication, SessionAuthentication, )
-    permission_classes = (IsAuthenticated, )
+    # authentication_classes = (TokenAuthentication, SessionAuthentication, )
+    # permission_classes = (IsAuthenticated, )
 
-    def post(self, request, format='json'):
+    def post(self, request, format=None):
         serializer = EventSerializer(data=request.data)
         if serializer.is_valid():
             sessionid = request.headers.get("sessionid")
