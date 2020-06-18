@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  backend:
+    networks:
+      - db_network
+      - nginx_network
+    volumes:
+      - static_volume:/usr/src/todo/backend/static
+      - media_volume:/usr/src/todo/backend/media
+
+  db:
+    networks:
+      - db_network
+
+  proxy:
+    image: nginx:1.17
+    volumes:
+    - ./proxy:/etc/nginx/conf.d
+    - static_volume:/usr/src/todo/backend/static
+    - media_volume:/usr/src/todo/backend/media
+    ports:
+      - 8765:80
+    depends_on:
+      - backend
+    networks:
+      - nginx_network
+
+networks:
+  nginx_network:
+    driver: bridge
+  db_network:
+    driver: bridge
+
+volumes:
+  static_volume:
+  media_volume:

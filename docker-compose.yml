@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  backend:
+    build: backend/.
+    env_file:
+      - env_private/web.env
+      - env_private/db.env
+    environment:
+      - DJANGO_DEBUG=0
+    volumes:
+      - ./backend:/usr/src/todo/backend
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    env_file:
+      - env_private/db.env
