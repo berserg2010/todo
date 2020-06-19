@@ -9,3 +9,6 @@ class Event(models.Model):
     event_date = models.DateTimeField()
 
     owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ["event_data"]
