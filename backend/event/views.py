@@ -1,24 +1,21 @@
 from django.shortcuts import render
+from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.viewsets import ModelViewSet
 
+from .models import Event
 from .serializers import EventSerializer
 
 
-class EventCreate(APIView):
-    # authentication_classes = (TokenAuthentication, SessionAuthentication, )
-    # permission_classes = (IsAuthenticated, )
+class EventViewSet(ModelViewSet):
 
-    def post(self, request, format=None):
-        serializer = EventSerializer(data=request.data)
-        if serializer.is_valid():
-            sessionid = request.headers.get("sessionid")
-            print(request.session.get('user_id'))
-            event = serializer.save()
-            if event:
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly, )
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)

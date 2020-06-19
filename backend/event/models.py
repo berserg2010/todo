@@ -4,11 +4,16 @@ from django.contrib.auth import get_user_model
 
 class Event(models.Model):
 
-    title = models.CharField(max_length=127)
+    title = models.CharField(max_length=127, null=None, blank=None)
     description = models.TextField()
-    event_date = models.DateTimeField()
+    event_date = models.DateTimeField(null=None, blank=None)
 
-    owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    owner = models.ForeignKey(
+        get_user_model(),
+        related_name="events",
+        on_delete=models.CASCADE,
+        null=None, blank=None,
+    )
 
     class Meta:
-        ordering = ["event_data"]
+        ordering = ["event_date"]
