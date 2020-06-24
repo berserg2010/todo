@@ -9,9 +9,22 @@ from .serializers import EventSerializer
 from .permissions import IsOwner
 
 
+def task_send_new_event(obj, data):
+
+    send_mail(
+        f"Новое событие <<{data.get('title')}>>",
+        f"{data.get('description')}\n{data.get('event_date')}",
+        settings.EMAIL_HOST_USER,
+        [obj.request.user.email],
+    )
+
+
+def task_send_a_reminder():
+    pass
+
+
 class EventViewSet(ModelViewSet):
 
-    # queryset = Event.objects.all()
     serializer_class = EventSerializer
     permission_classes = (
         IsAuthenticated,
@@ -23,11 +36,6 @@ class EventViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
 
-        send_mail(
-            f"Новое событие <<{serializer.validated_data.get('title')}>>",
-            f"{serializer.validated_data.get('description')}\n{serializer.validated_data.get('event_date')}",
-            settings.EMAIL_HOST_USER,
-            [ self.request.user.email ],
-        )
+        task_send_new_event(self, serializer.validated_data)
 
         serializer.save(owner=self.request.user)

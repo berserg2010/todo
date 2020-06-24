@@ -8,3 +8,9 @@ services:
       [ "python", "manage.py", "runserver", "0.0.0.0:8000" ]
     ports:
       - "8000:8000"
+
+  celery:
+    command: celery -A backend worker -l info
+
+  celery_beat:
+    command: celery -A backend beat -l info

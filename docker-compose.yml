@@ -17,3 +17,25 @@ services:
     image: postgres
     env_file:
       - env_private/db.env
+
+  redis:
+    image: redis:alpine
+
+  celery:
+    build: backend/.
+    volumes:
+      - ./backend:/usr/src/todo/backend
+    depends_on:
+      - db
+      - redis
+      - backend
+
+  celery_beat:
+    build: backend/.
+    volumes:
+      - ./backend:/usr/src/todo/backend
+    depends_on:
+      - db
+      - redis
+      - backend
+
