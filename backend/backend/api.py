@@ -6,5 +6,5 @@ from event.views import EventViewSet
 
 router = DefaultRouter()
 
-router.register(r"users", UserViewSet)
+router.register(r"users", UserViewSet, basename="users")
 router.register(r"events", EventViewSet, basename="events")

@@ -15,5 +15,9 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         fields = (
             "id",
             "username", "email",
+            "password",
             # "events",
         )
+        extra_kwargs = {
+            "password": {"write_only": True, "min_length": 8},
+        }
