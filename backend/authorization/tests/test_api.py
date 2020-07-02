@@ -8,15 +8,16 @@ from rest_framework.test import APIClient
 pytestmark = pytest.mark.django_db
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def create_superuser():
     get_user_model().objects.create_user(
         username="root",
         password="lkasdjlkasdflaksdjf",
     )
+    yield
 
 
-@pytest.fixture
+@pytest.fixture(scope="class")
 def api_client():
 
     client = APIClient()
@@ -41,9 +42,10 @@ def user_connection_api():
     yield _user_connection_api
 
 
+@pytest.mark.usefixtures("create_superuser")
 class TestUserRegistrationAPI:
 
-    def test_create_user_no_password(self, create_superuser, api_client, user_connection_api):
+    def test_create_user_no_password(self, api_client, user_connection_api):
 
         data = [
             "users-list",
@@ -58,9 +60,10 @@ class TestUserRegistrationAPI:
 
         assert get_user_model().objects.count() == 1
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 0
 
 
-    def test_create_user_invalid_password(self, create_superuser, api_client, user_connection_api):
+    def test_create_user_invalid_password(self, api_client, user_connection_api):
 
         data = [
             "users-list",
@@ -75,9 +78,10 @@ class TestUserRegistrationAPI:
 
         assert get_user_model().objects.count() == 1
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 0
 
 
-    def test_create_user(self, create_superuser, api_client, user_connection_api):
+    def test_create_user(self, api_client, user_connection_api):
 
         data = [
             "users-list",
