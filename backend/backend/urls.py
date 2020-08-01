@@ -8,6 +8,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     path("api/auth/",  include("rest_framework.urls")),
-    # path("api/auth/",  include("djoser.urls.authtoken")),
-    path("api/", include(router.urls)),
+
+    path("api/", include(router.urls), name='api'),
 ]

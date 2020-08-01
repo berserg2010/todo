@@ -2,15 +2,10 @@ from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.viewsets import ModelViewSet
 
 from .serializers import UserSerializer
-
-
-class UserViewSet(ModelViewSet):
-
-    queryset = get_user_model().objects.order_by("username")
-    serializer_class = UserSerializer
 
 
 class UserCreate(APIView):
@@ -21,7 +16,13 @@ class UserCreate(APIView):
         if serializer.is_valid():
             user = serializer.save()
             if user:
-                # user.email_user("Вы зареристрировались", "Хай", fail_silently=True)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserViewSet(ModelViewSet):
+
+    permission_classes = (IsAuthenticated, )
+    queryset = get_user_model().objects.order_by("username")
+    serializer_class = UserSerializer

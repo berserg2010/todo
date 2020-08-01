@@ -1,22 +1,37 @@
+### Задание
+
+Сделать сервис событий.
+Сервис должен быть реализован как SPA-приложение.
+
+Пользователь создает событие (встреча, звонок и т.д.) с заголовком, содержанием и датой проведения. 
+Пользователь должен иметь возможность совершать CRUD-операции над своими событиями. 
+Искать по заголовку и фильтровать по дате (события за последние месяц, неделю, день)
+
+За час до проведения события, сервис отправляет напоминание по e-mail автору.
+
+Технологии:
+Python3, Django, DRF, vuejs, postgresql
+
+
 ### Установка Docker
 
 https://docs.docker.com/engine/install/
 
 ### Создание миграции, регистрация суперпользователя
 
-    docker-compose run web python manage.py makemigrations
-    docker-compose run web python manage.py migrate
+    docker-compose run backend python manage.py makemigrations
+    docker-compose run backend python manage.py migrate
 >
-    docker-compose run web python manage.py createsuperuser
+    docker-compose run backend python manage.py createsuperuser
 
 Потребуется ввести `Username` и `Password`.
 
 
 ### Иницыализация данных приложений
-    docker-compose run web python manage.py loaddata <app>/fixtures/init_<app>.json
+    docker-compose run backend python manage.py loaddata <app>/fixtures/init_<app>.json
 
 ### Сбор статики
-    docker-compose run web python manage.py collectstatic --no-input
+    docker-compose run backend python manage.py collectstatic --no-input
 
 
 ### Запуск контейнеров
@@ -33,8 +48,8 @@ https://docs.docker.com/engine/install/
 
 
 ### Запуск unit тестов
-    docker-compose run web pytest
+    docker-compose run backend pytest
 
 
 ### Снятие копии с базы данных приложения
-    docker-compose run web python manage.py dumpdata <app> --indent 2 --output dump_<app>.json
+    docker-compose run backend python manage.py dumpdata <app> --indent 2 --output dump_<app>.json

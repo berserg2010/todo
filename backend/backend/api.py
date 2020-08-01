@@ -1,7 +1,7 @@
 from rest_framework.routers import DefaultRouter
 
-from authorization.views import UserViewSet
-from event.views import EventViewSet
+from authorization.api import UserViewSet
+from event.api import EventViewSet
 
 
 router = DefaultRouter()

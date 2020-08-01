@@ -4,11 +4,11 @@ from django.contrib import admin
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = os.environ.get(
+SECRET_KEY = os.getenv(
     "DJANGO_SECRET_KEY",
     "SECRET_KEY"
 )
-DEBUG = os.environ.get(
+DEBUG = os.getenv(
     "DJANGO_DEBUG",
     False
 )
@@ -27,7 +27,6 @@ INSTALLED_APPS = [
     'django.contrib.sites',
 
     "rest_framework",
-    "djoser",
     "rest_framework.authtoken",
     "corsheaders",
 
@@ -142,10 +141,10 @@ CACHES = {
 }
 
 # EMAIL
-EMAIL_HOST = os.environ.get("EMAIL_HOST")
+EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = 465
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_USE_SSL = True
 
 SERVER_EMAIL = EMAIL_HOST_USER

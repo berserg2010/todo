@@ -15,8 +15,6 @@ USER node
 
 COPY . ./
 
-#EXPOSE 80
-
 #CMD ["gunicorn", "--bind", ":80", "backend.wsgi:application"]
 
 CMD [ "python", "manage.py", "runserver" ]
