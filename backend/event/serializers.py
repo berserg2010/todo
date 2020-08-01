@@ -10,4 +10,5 @@ class EventSerializer(serializers.HyperlinkedModelSerializer):
         fields = (
             "id",
             "title", "description", "event_date",
+            'in_archive', 'to_repeat',
         )
