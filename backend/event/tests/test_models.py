@@ -1,34 +1,20 @@
 import pytest
 from mixer.backend.django import mixer
-from django.utils import timezone
 
+from utils.utils import (
+    date_now,
+    date_timedelta_2_hours,
+    date_timedelta_24_hours,
+    check_data,
+    join_test_data,
+)
 from ..models import Event
 
 
 pytestmark = pytest.mark.django_db
 
 
-def join_test_data(check_data, correct_value):
-    for i in range(len(check_data)):
-        yield (*check_data[i], *correct_value[i])
-
-
 class TestEventModel:
-
-    date_now = timezone.now()
-    date_timedelta_2_hours = date_now + timezone.timedelta(hours=2)
-    date_timedelta_24_hours = date_now + timezone.timedelta(hours=24)
-    data = (
-        (date_timedelta_2_hours, False, False),
-        (date_timedelta_2_hours, True, False),
-        (date_timedelta_2_hours, False, True),
-        (date_timedelta_2_hours, True, True),
-
-        (date_now, False, False),
-        (date_now, True, False),
-        (date_now, False, True),
-        (date_now, True, True),
-    )
 
     def test_model(self):
         instance = mixer.blend(Event)
@@ -38,7 +24,7 @@ class TestEventModel:
     @pytest.mark.parametrize(
         'event_date, in_archive, to_repeat, correct_event_date, correct_in_archive, correct_to_repeat',
         join_test_data(
-            check_data=data,
+            check_data=check_data,
             correct_value=(
                 (date_timedelta_2_hours, False, False,),
                 (date_timedelta_2_hours, True, False,),

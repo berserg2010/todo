@@ -1,11 +1,14 @@
 from __future__ import absolute_import, unicode_literals
 from django.core.mail import send_mail
 from django.core.cache import cache
-from django.utils.timezone import get_current_timezone
 from celery import shared_task, group, signals, chord
-import os
-import datetime as dt
+from typing import List
 
+from utils.utils import (
+    date_now,
+    date_timedelta_2_hours,
+    date_timedelta_24_hours,
+)
 from .models import Event
 from backend import settings
 
@@ -17,15 +20,18 @@ from backend import settings
 #
 #     cache.set("workstations_ip_addresses", workstations_ip_addresses, timeout=None)
 
+
+def get_list_events():
+    return list(Event.objects.filter(in_archive=False, event_date__range=(date_now, date_timedelta_2_hours)).values_list(
+        'id', 'title', 'description', 'event_date', 'owner__email',
+    ))
+
+
 @shared_task
-def task_adding_events_to_the_cache_at_startup():
+def task_adding_events_to_the_cache(list_events: List):
 
-    timedelta = dt.timedelta(hours=1)
-    dt_start = dt.datetime.now(tz=get_current_timezone()) + dt.timedelta(hours=1)
-    dt_end = dt_start + timedelta
-
-    events = list(Event.objects.filter(event_date__range=(dt_start, dt_end)).values_list("id", flat=True))
-    return events
+    for i in list_events:
+        cache.set(i[0], i[1:], timeout=(i[3] - date_now).seconds)
 
 
 @shared_task
@@ -44,7 +50,7 @@ def task_add_cache():
 
 
 @shared_task
-def task_add_event_beat_two_hours():
+def task_add_event_beat_2_hours():
     pass
 
 
