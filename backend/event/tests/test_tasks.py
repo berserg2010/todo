@@ -1,8 +1,6 @@
 import pytest
 from mixer.backend.django import mixer
-from django_redis import get_redis_connection
 from django.core.cache import cache
-from datetime import datetime
 
 from utils.utils import (
     date_timedelta_1_5_hours,
@@ -53,7 +51,7 @@ class TestEvent:
         if len(get_list_events()):
             assert get_list_events() == list_events(event_date)
 
-
+    @pytest.mark.skip
     def test_adding_events_to_the_cache(self):
 
         mixer.blend(

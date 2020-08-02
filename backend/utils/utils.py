@@ -8,6 +8,7 @@ root_auth = {
 }
 
 date_now = timezone.now()
+date_timedelta_1_hour = date_now + timezone.timedelta(hours=1)
 date_timedelta_1_5_hours = date_now + timezone.timedelta(hours=1.5)
 date_timedelta_2_hours = date_now + timezone.timedelta(hours=2)
 date_timedelta_24_hours = date_now + timezone.timedelta(hours=24)

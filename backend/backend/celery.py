@@ -17,11 +17,10 @@ app.autodiscover_tasks()
 
 
 app.conf.beat_schedule = {
-    'add-every-60-minutes': {
-        'task': 'event.tasks.task_print_hello',
-        'schedule': 30.0,
-        # 'schedule': crontab(),
-        # 'schedule': crontab(hour=7),
+    'add-every-2-hour': {
+        'task': 'event.tasks.task_fabric',
+        'schedule': 60.0,
+        # 'schedule': crontab(hour=2),
     },
 }
 

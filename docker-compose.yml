@@ -25,6 +25,8 @@ services:
 
   celery:
     build: backend/.
+    env_file:
+      - env_private/web.env
     volumes:
       - ./backend:/usr/src/todo/backend
     depends_on:
@@ -32,6 +34,8 @@ services:
 
   celery_beat:
     build: backend/.
+    env_file:
+      - env_private/web.env
     volumes:
       - ./backend:/usr/src/todo/backend
     depends_on:
