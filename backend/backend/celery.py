@@ -19,7 +19,7 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     'add-every-2-hour': {
         'task': 'event.tasks.task_run_beat',
-        'schedule': 60.0,
+        'schedule': 120.0,
         # 'schedule': crontab(hour=2),
     },
 }

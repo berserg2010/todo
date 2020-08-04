@@ -3,13 +3,11 @@ from django.core.mail import send_mail
 from django.core.cache import cache
 from django.utils.dateparse import parse_datetime
 from django.utils import timezone
-from celery import shared_task, group, signals, chord, uuid, result
-from celery.result import AsyncResult
+from celery import shared_task, group, signals, uuid
 from celery.contrib.abortable import AbortableTask, AbortableAsyncResult
-from celery.utils.log import get_logger, get_task_logger
+from celery.utils.log import get_task_logger
 from typing import List, Tuple, Optional
 from smtplib import SMTPException
-import time
 
 from utils.utils import (
     date_now,
@@ -32,7 +30,7 @@ def task_init_in_startup(sender=None, headers=None, body=None, **kwargs):
 
 @shared_task
 def task_run_beat():
-    task_main(check_for_new_events(get_list_events()))
+    task_main(check_the_list_of_events(get_list_events()))
 
 
 @shared_task
@@ -48,7 +46,7 @@ def task_main(list_events):
 
 
 @shared_task
-def add_event_task(event: List):
+def add_event_task(event: Tuple):
 
     task_id = uuid()
 
@@ -58,57 +56,51 @@ def add_event_task(event: List):
     )
 
 
-def check_for_new_events(list_events: List):
+def check_the_list_of_events(list_events: List):
 
     filtered_list_events = []
 
     for event in list_events:
-
-        checked_event = check_for_new_event(event)
-        if checked_event is None:
-            continue
-
-        filtered_list_events.append(checked_event)
+        if can_add_an_event(event):
+            filtered_list_events.append(event)
 
     return filtered_list_events
 
 
-def check_for_new_event(event: List):
+def can_add_an_event(event: Tuple) -> bool:
 
-    event_in_cache = get_event_from_the_cache(event[0])
+    event_from_cache = get_event_from_the_cache(event[0])
 
-    if event_in_cache is not None and event_in_cache[:-1] == event[1:]:
-        return
+    if event_from_cache is not None and event_from_cache[:-1] == event:
+        return False
 
-    abort_send_mail(event[0])
+    elif event_from_cache is not None:
+        abort_send_mail(event_from_cache)
 
-    return event
+    return True
 
 
-def abort_send_mail(event_id):
+def abort_send_mail(event_from_cache: List) -> None:
+    abort_event_task(event_from_cache[-1])
+    del_event_from_the_cache(event_from_cache[0])
 
-    print('abort_send_mail', event_id)
 
-    event_in_cache = get_event_from_the_cache(event_id)
-
-    if event_in_cache is not None:
-        result_task_send_mail = AbortableAsyncResult(event_in_cache[-1], app=task_send_mail)
-        result_task_send_mail.abort()
-        del_event_from_the_cache(event_id)
+def abort_event_task(task_id: str) -> None:
+    result_task_send_mail = AbortableAsyncResult(task_id, app=task_send_mail)
+    result_task_send_mail.abort()
 
 
 @shared_task
 def task_add_event_to_the_cache(event: Tuple) -> None:
 
-    cache.set(event[0], event[1:], timeout=(parse_datetime(event[3]) - date_now).seconds)
-    # cache.set(event[0], event[1:])
+    cache.set(event[0], event, timeout=(parse_datetime(event[3]) - date_now).seconds)
 
 
 def get_event_from_the_cache(event_id: int) -> Optional[List]:
-    event = cache.get(event_id, None)
-    if event is not None:
-        event = *event[0:2], parse_datetime(event[2]), *event[3:]
-    return event
+    event_from_cache = cache.get(event_id, None)
+    if event_from_cache is not None:
+        event_from_cache = *event_from_cache[0:3], parse_datetime(event_from_cache[3]), *event_from_cache[4:]
+    return event_from_cache
 
 
 def del_event_from_the_cache(event_id: int) -> None:
@@ -127,15 +119,15 @@ def task_send_mail(self, event_id: int) -> None:
         return
 
     try:
-        event = get_event_from_the_cache(event_id)
-        if event is None:
+        event_from_cache = get_event_from_the_cache(event_id)
+        if event_from_cache is None:
             raise IndexError
 
         send_mail(
-            f"Новое событие <<{event[0]}>>",
-            f"{event[1]}\n{timezone.localtime(event[2])}",
+            f"Новое событие <<{event_from_cache[1]}>>",
+            f"{event_from_cache[2]}\n{timezone.localtime(event_from_cache[3])}",
             settings.EMAIL_HOST_USER,
-            [event[3]],
+            [event_from_cache[4]],
         )
 
     except SMTPException as e:
@@ -158,5 +150,26 @@ def get_list_events() -> List:
     ))
 
 
-def create_task_event(event_id):
-    pass
+@shared_task
+def create_task_event(event_id: int):
+
+    row_event = Event.objects.select_related('owner').get(pk=event_id)
+
+    event = (
+        row_event.id,
+        row_event.title,
+        row_event.description,
+        row_event.event_date,
+        row_event.owner.email,
+    )
+
+    if can_add_an_event(event):
+        add_event_task(event).apply_async()
+
+
+@shared_task
+def delete_task_event(event_id: int):
+    event_from_cache = get_event_from_the_cache(event_id)
+
+    if event_from_cache is not None:
+        abort_send_mail(event_from_cache)
