@@ -12,7 +12,7 @@ from utils.utils import (
 from event.models import Event
 from event.tasks import (
     get_list_events,
-    task_adding_events_to_the_cache,
+    # task_adding_events_to_the_cache,
 )
 
 
@@ -51,18 +51,18 @@ class TestEvent:
         if len(get_list_events()):
             assert get_list_events() == list_events(event_date)
 
-    @pytest.mark.skip
-    def test_adding_events_to_the_cache(self):
-
-        mixer.blend(
-            Event,
-            event_date=date_timedelta_1_5_hours,
-            in_archive=False,
-            to_repeat=False,
-        )
-
-        task_adding_events_to_the_cache(list_events(date_timedelta_1_5_hours))
-        task_adding_events_to_the_cache([(2, 'Test2', '', date_timedelta_1_5_hours, 'ivan@abc.com')])
-
-        assert cache.get(1) == ['Test', '', format_as_iso8601(date_timedelta_1_5_hours), 'ivan@abc.com']
-        assert cache.get(2) == ['Test2', '', format_as_iso8601(date_timedelta_1_5_hours), 'ivan@abc.com']
+    # @pytest.mark.skip
+    # def test_adding_events_to_the_cache(self):
+    #
+    #     mixer.blend(
+    #         Event,
+    #         event_date=date_timedelta_1_5_hours,
+    #         in_archive=False,
+    #         to_repeat=False,
+    #     )
+    #
+    #     task_adding_events_to_the_cache(list_events(date_timedelta_1_5_hours))
+    #     task_adding_events_to_the_cache([[2, 'Test2', '', date_timedelta_1_5_hours, 'ivan@abc.com']])
+    #
+    #     assert cache.get(1) == ['Test', '', format_as_iso8601(date_timedelta_1_5_hours), 'ivan@abc.com']
+    #     assert cache.get(2) == ['Test2', '', format_as_iso8601(date_timedelta_1_5_hours), 'ivan@abc.com']

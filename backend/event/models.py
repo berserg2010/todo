@@ -3,6 +3,18 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 
+from utils.utils import (
+    date_now,
+    date_timedelta_1_hour,
+    date_timedelta_2_hours,
+    date_timedelta_24_hours,
+)
+# from .tasks import (
+#     create_task_event,
+#     abort_send_mail,
+# )
+
+
 class Event(models.Model):
 
     title = models.CharField(max_length=127, null=False, blank=False)
@@ -27,15 +39,24 @@ class Event(models.Model):
 
 
     def save(self, *args, **kwargs):
-        if self.event_date <= timezone.now() and not self.in_archive and self.to_repeat:
+        if self.event_date <= date_now and not self.in_archive and self.to_repeat:
             self.event_date += timezone.timedelta(hours=24)
-        elif self.event_date <= timezone.now() and not self.in_archive:
+        elif self.event_date <= date_now and not self.in_archive:
             self.in_archive = True
+
         super().save(*args, **kwargs)
+
+        # if date_now <= self.event_date <= date_timedelta_2_hours and not self.in_archive:
+        #     create_task_event(self.pk)
+
+
+    def delete(self, *args, **kwargs):
+        # abort_send_mail(self.pk)
+        super().delete(*args, **kwargs)
 
 
     class Meta:
-        ordering = ["event_date"]
+        ordering = ["-event_date"]
 
     def __str__(self):
-        return f"{self.owner} | {self.event_date.date()} {self.event_date.time()} | {self.title}"
+        return f"{self.title} | {self.owner} | {timezone.localtime(self.event_date)}"

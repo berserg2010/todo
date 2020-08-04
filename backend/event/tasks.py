@@ -1,9 +1,15 @@
 from __future__ import absolute_import, unicode_literals
 from django.core.mail import send_mail
 from django.core.cache import cache
-from celery import shared_task, group, signals, chord, uuid
-from typing import List, Optional
+from django.utils.dateparse import parse_datetime
+from django.utils import timezone
+from celery import shared_task, group, signals, chord, uuid, result
+from celery.result import AsyncResult
+from celery.contrib.abortable import AbortableTask, AbortableAsyncResult
+from celery.utils.log import get_logger, get_task_logger
+from typing import List, Tuple, Optional
 from smtplib import SMTPException
+import time
 
 from utils.utils import (
     date_now,
@@ -15,50 +21,134 @@ from .models import Event
 from backend import settings
 
 
+logger = get_task_logger(__name__)
+
+
 @signals.beat_init.connect
 def task_init_in_startup(sender=None, headers=None, body=None, **kwargs):
-    task_fabric()
+    clear_cache()
+    task_main(get_list_events())
 
 
 @shared_task
-def task_fabric():
-
-    list_events = get_list_events()
-    print(list_events)
-    if len(list_events):
-        task_adding_events_to_the_cache.s(list_events).apply_async()
-        task_send_mails_delay(list_events)
+def task_run_beat():
+    task_main(check_for_new_events(get_list_events()))
 
 
 @shared_task
-def task_adding_events_to_the_cache(list_events: List[List]) -> None:
-    group(adding_event_to_the_cache(event) for event in list_events)
+def task_main(list_events):
 
-def adding_event_to_the_cache(event: List) -> None:
-    cache.set(event[0], event[1:], timeout=(event[3] - date_now).seconds)
+    tasks = []
 
+    for event in list_events:
 
-def task_send_mails_delay(list_events: List[List]) -> None:
-    for i in list_events:
-        task_send_mail.apply_async((i, ), eta=i[3])
+        tasks.append(add_event_task(event))
+
+    return group(tasks).apply_async()
+
 
 @shared_task
-def task_send_mail(event: List) -> None:
+def add_event_task(event: List):
+
+    task_id = uuid()
+
+    return group(
+        task_add_event_to_the_cache.signature(((*event[:], task_id),)),
+        task_send_mail.signature((event[0],), eta=event[3], task_id=task_id)
+    )
+
+
+def check_for_new_events(list_events: List):
+
+    filtered_list_events = []
+
+    for event in list_events:
+
+        checked_event = check_for_new_event(event)
+        if checked_event is None:
+            continue
+
+        filtered_list_events.append(checked_event)
+
+    return filtered_list_events
+
+
+def check_for_new_event(event: List):
+
+    event_in_cache = get_event_from_the_cache(event[0])
+
+    if event_in_cache is not None and event_in_cache[:-1] == event[1:]:
+        return
+
+    abort_send_mail(event[0])
+
+    return event
+
+
+def abort_send_mail(event_id):
+
+    print('abort_send_mail', event_id)
+
+    event_in_cache = get_event_from_the_cache(event_id)
+
+    if event_in_cache is not None:
+        result_task_send_mail = AbortableAsyncResult(event_in_cache[-1], app=task_send_mail)
+        result_task_send_mail.abort()
+        del_event_from_the_cache(event_id)
+
+
+@shared_task
+def task_add_event_to_the_cache(event: Tuple) -> None:
+
+    cache.set(event[0], event[1:], timeout=(parse_datetime(event[3]) - date_now).seconds)
+    # cache.set(event[0], event[1:])
+
+
+def get_event_from_the_cache(event_id: int) -> Optional[List]:
+    event = cache.get(event_id, None)
+    if event is not None:
+        event = *event[0:2], parse_datetime(event[2]), *event[3:]
+    return event
+
+
+def del_event_from_the_cache(event_id: int) -> None:
+    return cache.delete(event_id)
+
+
+def clear_cache() -> None:
+    return cache.clear()
+
+
+@shared_task(bind=True, base=AbortableTask)
+def task_send_mail(self, event_id: int) -> None:
+
+    if self.is_aborted():
+        logger.warning('Task aborted')
+        return
 
     try:
+        event = get_event_from_the_cache(event_id)
+        if event is None:
+            raise IndexError
+
         send_mail(
-            f"Новое событие <<{event[1]}>>",
-            f"{event[2]}\n{event[3]}",
+            f"Новое событие <<{event[0]}>>",
+            f"{event[1]}\n{timezone.localtime(event[2])}",
             settings.EMAIL_HOST_USER,
-            [event[4]],
+            [event[3]],
         )
+
     except SMTPException as e:
-        print(e)
+        logger.warning(e)
+
+    except IndexError as e:
+        logger.warning(e)
     else:
-        Event.objects.get(pk=event[0]).update_state_event_after_send_mail()
+        del_event_from_the_cache(event_id)
+        Event.objects.get(pk=event_id).update_state_event_after_send_mail()
 
 
-def get_list_events() -> List[Optional[List]]:
+def get_list_events() -> List:
     return list(Event.objects.filter(
         in_archive=False,
         # event_date__range=(date_timedelta_1_hour, date_timedelta_2_hours),
@@ -68,21 +158,5 @@ def get_list_events() -> List[Optional[List]]:
     ))
 
 
-# @shared_task
-# def task_to_execute_the_events():
-#     pass
-#
-#
-# @shared_task
-# def task_remote_event_in_cache():
-#     pass
-#
-#
-# @shared_task
-# def task_add_cache():
-#     pass
-#
-#
-# @shared_task
-# def task_add_event_beat_2_hours():
-#     pass
+def create_task_event(event_id):
+    pass
