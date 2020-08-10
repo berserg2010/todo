@@ -6,7 +6,7 @@ from rest_framework import status
 pytestmark = pytest.mark.django_db
 
 
-@pytest.mark.usefixtures("create_superuser")
+@pytest.mark.usefixtures('create_superuser')
 class TestUsersAPI:
 
     @pytest.mark.parametrize('password', ['', 'ssdf'])
@@ -20,7 +20,8 @@ class TestUsersAPI:
 
         response = api_connection(
             api_client_register,
-            '/api/users/',
+            # '/api/users/',
+            '/api/auth/users/',
             'post',
             data,
         )
@@ -38,7 +39,8 @@ class TestUsersAPI:
 
         response = api_connection(
             api_client_register,
-            '/api/users/',
+            # '/api/users/',
+            '/api/auth/users/',
             'post',
             data,
         )

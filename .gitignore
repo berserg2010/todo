@@ -2,6 +2,20 @@
 # Created by https://www.gitignore.io/api/django,python,virtualenv
 # Edit at https://www.gitignore.io/?templates=django,python,virtualenv
 
+
+### Node ###
+.DS_Store
+node_modules
+/dist
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
 ### Django ###
 *.log
 *.pot
@@ -186,4 +200,11 @@ pip-selfcheck.json
 
 # End of https://www.gitignore.io/api/django,python,virtualenv
 
-.idea/
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

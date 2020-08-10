@@ -1,0 +1,30 @@
+[
+  {
+    "name": "auth",
+    "path": "/auth",
+    "component": "/usr/src/todo/frontend/pages/auth/index.vue",
+    "chunkName": "pages/auth/index",
+    "_name": "_554c6ce1"
+  },
+  {
+    "name": "new-event",
+    "path": "/new-event",
+    "component": "/usr/src/todo/frontend/pages/new-event/index.vue",
+    "chunkName": "pages/new-event/index",
+    "_name": "_4a2858ac"
+  },
+  {
+    "name": "index",
+    "path": "/",
+    "component": "/usr/src/todo/frontend/pages/index.vue",
+    "chunkName": "pages/index",
+    "_name": "_a55fa4e8"
+  },
+  {
+    "name": "id",
+    "path": "/:id",
+    "component": "/usr/src/todo/frontend/pages/_id/index.vue",
+    "chunkName": "pages/_id/index",
+    "_name": "_7dffa277"
+  }
+]

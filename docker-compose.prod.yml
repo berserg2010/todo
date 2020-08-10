@@ -1,35 +1,58 @@
 version: '3'
 
 services:
-  backend:
-    networks:
-      - db_network
-      - nginx_network
-    volumes:
-      - static_volume:/usr/src/todo/backend/static
-      - media_volume:/usr/src/todo/backend/media
 
   db:
     networks:
       - db_network
 
-  proxy:
-    image: nginx:1.17
-    volumes:
-    - ./proxy:/etc/nginx/conf.d
-    - static_volume:/usr/src/todo/backend/static
-    - media_volume:/usr/src/todo/backend/media
+  backend:
+    command:
+      [ "gunicorn", "--bind", ":80", "backend.wsgi:application" ]
     ports:
-      - 8765:80
+      - 80:80
+    networks:
+      - db_network
+      - backend_network
+    volumes:
+      - static_volume:/usr/src/todo/backend/static
+      - media_volume:/usr/src/todo/backend/media
+
+  frontend:
+    environment:
+      - NODE_ENV=production
+      - NUXT_HOST=proxy_network
+      - NUXT_PORT=80
+#        - HOST=0.0.0.0
+    command:
+      [ "npm", "run", "start" ]
+    ports:
+      - 80:80
     depends_on:
       - backend
     networks:
-      - nginx_network
+      - backend_network
+      - proxy_network
+
+  proxy:
+    image: nginx:1.17
+    volumes:
+      - ./proxy:/etc/nginx/conf.d
+      - static_volume:/usr/src/todo/backend/static
+      - media_volume:/usr/src/todo/backend/media
+    ports:
+      - 8765:80
+    depends_on:
+      - frontend
+    networks:
+      - proxy_network
 
 networks:
-  nginx_network:
-    driver: bridge
   db_network:
+    driver: bridge
+  backend_network:
+    driver: bridge
+  proxy_network:
     driver: bridge
 
 volumes:

@@ -12,15 +12,14 @@ app = Celery('backend')
 
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
-# app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 app.autodiscover_tasks()
 
 
 app.conf.beat_schedule = {
     'add-every-2-hour': {
         'task': 'event.tasks.task_run_beat',
-        'schedule': 120.0,
-        # 'schedule': crontab(hour=2),
+        # 'schedule': 120.0,
+        'schedule': crontab(hour=1),
     },
 }
 

@@ -13,8 +13,4 @@ RUN pip install -r requirements.txt
 RUN useradd --no-create-home --system --uid 1000 --user-group node
 USER node
 
-COPY . ./
-
-#CMD ["gunicorn", "--bind", ":80", "backend.wsgi:application"]
-
-CMD [ "python", "manage.py", "runserver" ]
+COPY . .

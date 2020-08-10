@@ -7,7 +7,8 @@ pytestmark = pytest.mark.django_db
 
 list_urls = (
     '/api/',
-    '/api/users/',
+    # '/api/users/',
+    '/api/auth/users/',
     '/api/events/',
 )
 

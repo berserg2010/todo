@@ -27,6 +27,7 @@ services:
     build: backend/.
     env_file:
       - env_private/web.env
+    command: celery -A backend worker --autoscale=10,0 -l info -E
     volumes:
       - ./backend:/usr/src/todo/backend
     depends_on:
@@ -36,8 +37,17 @@ services:
     build: backend/.
     env_file:
       - env_private/web.env
+    command: celery -A backend beat -l info
     volumes:
       - ./backend:/usr/src/todo/backend
     depends_on:
       - backend
 
+  frontend:
+    build: frontend/.
+    volumes:
+      - ./frontend/package.json:/usr/src/todo/package.json
+      - ./frontend/package-lock.json:/usr/src/todo/package-lock.json
+      - ./frontend:/usr/src/todo/frontend
+    depends_on:
+      - backend

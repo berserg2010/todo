@@ -4,7 +4,7 @@ from django.utils import timezone
 root_auth = {
     'username': 'root',
     'password': 'lkasdjlkasdflaksdjf',
-    'email': 'root@abc.com',
+    'email': 'root@asdfasdf.com',
 }
 
 date_now = timezone.now()

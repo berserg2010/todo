@@ -21,8 +21,8 @@ class UserCreate(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserViewSet(ModelViewSet):
-
-    permission_classes = (IsAuthenticated, )
-    queryset = get_user_model().objects.order_by("username")
-    serializer_class = UserSerializer
+# class UserViewSet(ModelViewSet):
+#
+#     permission_classes = (IsAuthenticated, )
+#     queryset = get_user_model().objects.order_by("username")
+#     serializer_class = UserSerializer

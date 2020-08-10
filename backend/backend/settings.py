@@ -1,15 +1,16 @@
 import os
-
 from django.contrib import admin
+from corsheaders.defaults import default_headers
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = os.getenv(
-    "DJANGO_SECRET_KEY",
-    "SECRET_KEY"
+    'DJANGO_SECRET_KEY',
+    'SECRET_KEY'
 )
 DEBUG = os.getenv(
-    "DJANGO_DEBUG",
+    'DJANGO_DEBUG',
     False
 )
 
@@ -26,18 +27,19 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
 
-    "rest_framework",
-    "rest_framework.authtoken",
-    "corsheaders",
+    'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',
+    'corsheaders',
 
-    "authorization",
-    "event",
+    'authorization',
+    'event',
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        "rest_framework.authentication.TokenAuthentication",
-        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -46,14 +48,30 @@ REST_FRAMEWORK = {
     # 'PAGE_SIZE': 100,
 }
 
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_URLS_REGEX = r"^/api/.*$"
+# Corsheaders
+CORS_ALLOW_HEADERS = default_headers + (
+    'contenttype',
+)
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000',
+    'http://localhost:80',
+]
+# CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ALLOW_CREDENTIALS = True
+# CORS_URLS_REGEX = r'^/api/.*$'
+
+DJOSER = {
+    'SEND_ACTIVATION_EMAIL': False,
+    'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
+    'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
+    'ACTIVATION_URL': '#/activate/{uid}/{token}',
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
 
-    "corsheaders.middleware.CorsMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
 
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -86,11 +104,11 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'HOST': os.environ.get("POSTGRES_HOST", "db"),
+        'HOST': os.environ.get('POSTGRES_HOST', 'db'),
         'PORT': 5432,
-        'NAME': os.environ.get("POSTGRES_DB", "postgres"),
-        'USER': os.environ.get("POSTGRES_USER", "postgres"),
-        'PASSWORD': os.environ.get("POSTGRES_PASSWORD", "postgres"),
+        'NAME': os.environ.get('POSTGRES_DB', 'postgres'),
+        'USER': os.environ.get('POSTGRES_USER', 'postgres'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'postgres'),
     }
 }
 
@@ -123,7 +141,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # CELERY
 CELERY_BROKER_URL = 'redis://redis:6379/0'
-CELERY_RESULT_BACKEND = 'redis://redis:6379/1'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 CELERY_ACCEPT_CONTENT = ['application/json', ]
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -132,7 +150,7 @@ CELERY_RESULT_SERIALIZER = 'json'
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://redis:6379/2',
+        'LOCATION': 'redis://redis:6379/1',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'SERIALIZER': 'django_redis.serializers.json.JSONSerializer',
@@ -141,10 +159,10 @@ CACHES = {
 }
 
 # EMAIL
-EMAIL_HOST = os.environ.get("EMAIL_HOST")
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
 EMAIL_PORT = 465
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_SSL = True
 
 SERVER_EMAIL = EMAIL_HOST_USER

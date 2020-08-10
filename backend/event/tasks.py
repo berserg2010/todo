@@ -6,6 +6,7 @@ from django.utils import timezone
 from celery import shared_task, group, signals, uuid
 from celery.contrib.abortable import AbortableTask, AbortableAsyncResult
 from celery.utils.log import get_task_logger
+from django_redis import get_redis_connection
 from typing import List, Tuple, Optional
 from smtplib import SMTPException
 
@@ -24,7 +25,7 @@ logger = get_task_logger(__name__)
 
 @signals.beat_init.connect
 def task_init_in_startup(sender=None, headers=None, body=None, **kwargs):
-    clear_cache()
+    cache_clear()
     task_main(get_list_events())
 
 
@@ -92,7 +93,6 @@ def abort_event_task(task_id: str) -> None:
 
 @shared_task
 def task_add_event_to_the_cache(event: Tuple) -> None:
-
     cache.set(event[0], event, timeout=(parse_datetime(event[3]) - date_now).seconds)
 
 
@@ -107,8 +107,9 @@ def del_event_from_the_cache(event_id: int) -> None:
     return cache.delete(event_id)
 
 
-def clear_cache() -> None:
-    return cache.clear()
+def cache_clear() -> None:
+    get_redis_connection('default').flushall()
+    cache.clear()
 
 
 @shared_task(bind=True, base=AbortableTask)
@@ -124,8 +125,13 @@ def task_send_mail(self, event_id: int) -> None:
             raise IndexError
 
         send_mail(
-            f"Новое событие <<{event_from_cache[1]}>>",
-            f"{event_from_cache[2]}\n{timezone.localtime(event_from_cache[3])}",
+            f"{event_from_cache[1]}",
+            f"{event_from_cache[1]}"
+            f"\n"
+            f"{timezone.localtime(event_from_cache[3])}"
+            f"\n"
+            f"{event_from_cache[2]}"
+            f"\n",
             settings.EMAIL_HOST_USER,
             [event_from_cache[4]],
         )
@@ -143,8 +149,8 @@ def task_send_mail(self, event_id: int) -> None:
 def get_list_events() -> List:
     return list(Event.objects.filter(
         in_archive=False,
-        # event_date__range=(date_timedelta_1_hour, date_timedelta_2_hours),
-        event_date__range=(date_now, date_timedelta_2_hours),
+        event_date__range=(date_timedelta_1_hour, date_timedelta_2_hours),
+        # event_date__range=(date_now, date_timedelta_2_hours),
     ).values_list(
         'id', 'title', 'description', 'event_date', 'owner__email',
     ))
