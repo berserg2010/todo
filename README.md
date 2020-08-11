@@ -49,7 +49,3 @@ https://docs.docker.com/engine/install/
 
 ### Запуск unit тестов
     docker-compose run backend pytest
-
-
-### Снятие копии с базы данных приложения
-    docker-compose run backend python manage.py dumpdata <app> --indent 2 --output dump_<app>.json
