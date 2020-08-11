@@ -45,9 +45,12 @@ services:
 
   frontend:
     build: frontend/.
+    environment:
+      - HOST=0.0.0.0
     volumes:
       - ./frontend/package.json:/usr/src/todo/package.json
       - ./frontend/package-lock.json:/usr/src/todo/package-lock.json
-      - ./frontend:/usr/src/todo/frontend
+      - ./frontend/nuxt.config.js:/usr/src/todo/nuxt.config.js
+      - ./frontend/client:/usr/src/todo/client
     depends_on:
       - backend

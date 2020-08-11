@@ -6,11 +6,11 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /usr/src/todo/backend
 
-COPY requirements.txt ./requirements.txt
+COPY --chown=1000:1000 requirements.txt ./requirements.txt
 
 RUN pip install -r requirements.txt
 
 RUN useradd --no-create-home --system --uid 1000 --user-group node
 USER node
 
-COPY . .
+COPY --chown=1000:1000 . ./

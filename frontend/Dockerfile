@@ -2,12 +2,9 @@ FROM node:12
 
 MAINTAINER <berserg2010@gmail.com>
 
-##ENV NPM_CONFIG_PREFIX=$APP_PATH/node/.npm-global
-
 ARG APP_PATH=/usr/src/todo
-ENV PATH=$APP_PATH/node_modules/.bin:$PATH
+#ENV PATH=$APP_PATH/node_modules/.bin:$PATH
 
-RUN mkdir -p $APP_PATH
 WORKDIR $APP_PATH
 
 #RUN deluser --remove-home node \
@@ -23,9 +20,10 @@ RUN npm ci && npm cache clean --force
 ##RUN npm install -SE nuxt @nuxtjs/axios js-cookie
 ##RUN npm install -DE eslint-plugin-nuxt node-sass sass-loader
 
-WORKDIR $APP_PATH/frontend
+#WORKDIR $APP_PATH/frontend
 
-COPY --chown=1000:1000 . ./
+COPY --chown=1000:1000 nuxt.config.js ./
+COPY --chown=1000:1000 ./client ./client
 
 RUN npm run build
 

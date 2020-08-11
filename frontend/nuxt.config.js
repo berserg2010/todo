@@ -78,4 +78,5 @@ export default {
   */
   build: {
   },
+  srcDir: 'client/',
 }
