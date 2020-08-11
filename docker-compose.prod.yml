@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
 
@@ -11,15 +11,17 @@ services:
       - cache_network
 
   backend:
-    command:
-      [ "gunicorn", "--bind", ":80", "backend.wsgi:application" ]
     ports:
-      - 80:80
+      - 8000
     user: root
+    command:
+      [ "gunicorn", "--bind", ":8000", "backend.wsgi:application" ]
     networks:
       - db_network
       - cache_network
       - backend_network
+    environment:
+      - DJANGO_DEBUG=0
     volumes:
       - static_volume:/usr/src/todo/backend/static
       - media_volume:/usr/src/todo/backend/media
@@ -41,14 +43,12 @@ services:
 #      - NUXT_PORT=80
 #      - PUBLIC_API_URL=
     ports:
-      - 3000:3000
+      - 3000
     command:
       [ "npm", "run", "start" ]
-    depends_on:
-      - backend
     networks:
+      - frontend_network
       - backend_network
-      - proxy_network
 
   proxy:
     image: nginx:1.17
@@ -57,11 +57,12 @@ services:
       - static_volume:/usr/src/todo/backend/static
       - media_volume:/usr/src/todo/backend/media
     ports:
-      - 8765:80
+      - 80
     depends_on:
       - frontend
     networks:
-      - proxy_network
+      - frontend_network
+      - backend_network
 
 networks:
   db_network:
@@ -70,7 +71,7 @@ networks:
     driver: bridge
   backend_network:
     driver: bridge
-  proxy_network:
+  frontend_network:
     driver: bridge
 
 volumes:

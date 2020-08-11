@@ -53,8 +53,11 @@ CORS_ALLOW_HEADERS = default_headers + (
     'contenttype',
 )
 CORS_ORIGIN_WHITELIST = [
-    'http://localhost:3000',
-    'http://localhost:80',
+    '*',
+    # 'http://localhost:3000',
+    # 'http://127.0.0.1:3000',
+    # 'http://localhost:8000',
+    # 'http://127.0.0.1:8000',
 ]
 # CORS_ORIGIN_ALLOW_ALL = True
 # CORS_ALLOW_CREDENTIALS = True
