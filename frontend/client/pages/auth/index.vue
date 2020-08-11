@@ -14,7 +14,7 @@ export default {
   components: {
     SignForm,
   },
-  layout: 'public-side',
+  layout: 'Public',
   middleware: ['check-auth', 'auth'],
 }
 </script>

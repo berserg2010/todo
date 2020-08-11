@@ -24,9 +24,6 @@ export default {
     },
     onDeleted(eventData) {
       this.$store.dispatch('deleteEvent', eventData)
-        .then(() => {
-          this.$router.push('/')
-        })
     },
   },
   validate({ params }) {

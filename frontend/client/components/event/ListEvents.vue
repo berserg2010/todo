@@ -30,6 +30,7 @@
           v-for="event in searchEvent"
           :key="event.id"
           :event="event"
+          @delete="onDeleted"
         />
       </tbody>
     </table>
@@ -77,7 +78,16 @@ export default {
         .filter((event) => {
           return new Date(event.event_date) > this.selected
         })
-    }
+    },
+  },
+  methods: {
+    onDeleted(eventData) {
+      const eventIndex = this.events.findIndex(
+        event => event.id === eventData.id
+      )
+      this.events.splice(eventIndex, 1)
+      this.$store.dispatch('deleteEvent', eventData)
+    },
   }
 }
 </script>

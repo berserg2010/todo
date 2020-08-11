@@ -24,7 +24,7 @@ const createStore = () => {
         const eventIndex = state.loadedEvents.findIndex(
           event => event.id === eventToDelete.id
         )
-        state.loadedEvents = state.loadedEvents.splice(eventIndex)
+        state.loadedEvents.splice(eventIndex, 0)
       },
       setToken(state, token) {
         state.token = token
@@ -60,12 +60,13 @@ const createStore = () => {
       deleteEvent({ commit }, event) {
         this.$axios.setHeader('Authorization', `Token ${this.state.token}`)
         return this.$axios.$delete(`/events/${event.id}/`, event)
-          .then((res) => {
+          .then(() => {
             commit('deleteEvent', event)
+            this.$router.push('/')
           })
           .catch(e => console.error(e))
       },
-      async authenticateUser({ commit, dispatch }, authData) {
+      authenticateUser({ commit, dispatch }, authData) {
         let authUrl, data
         if (authData.isLoginPage) {
           authUrl = '/auth/token/login/'
@@ -81,12 +82,13 @@ const createStore = () => {
             password: authData.password,
           }
         }
-        return await this.$axios.$post(authUrl, data)
+        return this.$axios.$post(authUrl, data)
           .then((res) => {
             commit('setDefaultState')
             commit('setToken', res.auth_token)
             localStorage.setItem('token', res.auth_token)
             Cookie.set('jwt', res.auth_token)
+            this.$router.push('/')
           })
           .catch((e) => {
             commit('setDefaultState')
@@ -119,10 +121,11 @@ const createStore = () => {
       logout({ commit, dispatch }) {
         this.$axios.setHeader('Authorization', `Token ${this.state.token}`)
         this.$axios.$post('/auth/token/logout/')
-          .then(res => console.info('Logout'))
+          .then(() => console.info('Logout'))
           .catch(e => console.error(e))
-        dispatch('clearCache')
+        this.$router.push('/auth')
         commit('setDefaultState')
+        dispatch('clearCache')
       },
       clearCache({ commit }) {
         commit('clearToken')

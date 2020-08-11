@@ -28,12 +28,13 @@ export default {
     }
   },
   data() {
-    return this.event
+    return {
+      eventData: this.event
+    }
   },
   methods: {
     onDelete() {
-      this.$store.dispatch('deleteEvent', this.event)
-      this.$router.push('/')
+      this.$emit('delete', this.eventData)
     },
     convertingBooleanValue(value) {
       return value ? 'Yes' : 'No'

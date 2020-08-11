@@ -18,19 +18,3 @@ $ npm run generate
 ```
 
 For detailed explanation on how things work, check out [Nuxt.js docs](https://nuxtjs.org).
-
-## Local
-
-### Подготовка окружения
-
-- node.js и npm
-
-
-    sudo apt install npm
-<!--    sudo npm install --global @vue/cli -->
-    sudo npm install --global create-nuxt-app
-
-
-В папке с проектом:
-
-    npm init
