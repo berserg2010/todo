@@ -8,10 +8,22 @@ services:
     command:
       [ "python", "manage.py", "runserver", "0.0.0.0:8000" ]
     ports:
-      - 8000:8000
+      - 8080:8000
+    networks:
+      - front_back
 
   frontend:
+    env_file:
+      - env_private/front_dev.env
+    environment:
+      - HOST=0.0.0.0
+    ports:
+      - 8000:3000
     command:
       [ "npm", "run", "dev" ]
-    ports:
-      - 3000:3000
+    networks:
+      - front_back
+
+networks:
+  front_back:
+    driver: bridge

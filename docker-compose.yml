@@ -6,9 +6,13 @@ services:
     image: postgres
     env_file:
       - env_private/db.env
+    networks:
+      - db_layer
 
   redis:
     image: redis:alpine
+    networks:
+      - db_layer
 
   backend:
     build: backend/.
@@ -22,16 +26,20 @@ services:
     depends_on:
       - db
       - redis
+    networks:
+      - db_layer
 
   celery:
     build: backend/.
     env_file:
       - env_private/web.env
-    command: celery -A backend worker --autoscale=10,0 -l info -E
+    command: celery -A backend worker --autoscale=10,0 -l info
     volumes:
       - ./backend:/usr/src/todo/backend
     depends_on:
       - backend
+    networks:
+      - db_layer
 
   celery_beat:
     build: backend/.
@@ -42,11 +50,11 @@ services:
       - ./backend:/usr/src/todo/backend
     depends_on:
       - backend
+    networks:
+      - db_layer
 
   frontend:
     build: frontend/.
-    environment:
-      - HOST=0.0.0.0
     volumes:
       - ./frontend/package.json:/usr/src/todo/package.json
       - ./frontend/package-lock.json:/usr/src/todo/package-lock.json
@@ -54,3 +62,7 @@ services:
       - ./frontend/client:/usr/src/todo/client
     depends_on:
       - backend
+
+networks:
+  db_layer:
+    driver: bridge

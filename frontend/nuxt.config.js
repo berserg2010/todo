@@ -63,14 +63,21 @@ export default {
   */
   modules: [
     // Doc: https://axios.nuxtjs.org/usage
-    '@nuxtjs/axios'
+    '@nuxtjs/axios',
+    '@nuxtjs/proxy'
   ],
   /*
   ** Axios module configuration
   ** See https://axios.nuxtjs.org/options
   */
   axios: {
-    baseURL: 'http://localhost:8000/api/'
+    baseURL: process.env.BROWSER_BASE_URL + ':8080/api/',
+    proxy: true
+  },
+  proxy: {
+  '/auth/token/login/': { target: process.env.BROWSER_BASE_URL + ':8080/api/' },
+  '/auth/token/logout/': { target: process.env.BROWSER_BASE_URL + ':8080/api/' },
+  '/events/': { target: process.env.BROWSER_BASE_URL + ':8080/api/' },
   },
   /*
   ** Build configuration

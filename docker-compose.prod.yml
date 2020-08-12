@@ -3,36 +3,64 @@ version: '3.8'
 services:
 
   backend:
-    ports:
-      - 8000:8000
-    user: root
-    command:
-      [ "gunicorn", "--bind", ":8000", "backend.wsgi:application" ]
     environment:
       - DJANGO_DEBUG=0
+      - HOST=0.0.0.0
+    ports:
+      - 8000
     volumes:
       - static_volume:/usr/src/todo/backend/static
       - media_volume:/usr/src/todo/backend/media
+    user: root
+    networks:
+      - proxy_back
+    command:
+      [ "gunicorn", "--bind", ":8000", "backend.wsgi:application" ]
 
   frontend:
+    env_file:
+      - env_private/front_dev.env
     environment:
-      - NODE_ENV=production
+      - HOST=0.0.0.0
     ports:
-      - 3000:3000
+      - 3000
+    networks:
+      - proxy_front
     command:
       [ "npm", "run", "start" ]
 
-  proxy:
+  proxy_back:
     image: nginx:1.17
+    ports:
+      - 8080:80
     volumes:
-      - ./proxy:/etc/nginx/conf.d
+      - ./proxy/todo_backend.conf:/etc/nginx/conf.d/todo_backend.conf
       - static_volume:/usr/src/todo/backend/static
       - media_volume:/usr/src/todo/backend/media
+    depends_on:
+      - backend
+    networks:
+      - proxy_back
+
+  proxy_front:
+    image: nginx:1.17
     ports:
-      - 8765:80
+      - 8000:80
+    volumes:
+      - ./proxy/todo_frontend.conf:/etc/nginx/conf.d/todo_frontend.conf
     depends_on:
       - frontend
+    networks:
+      - proxy_front
 
 volumes:
   static_volume:
   media_volume:
+
+networks:
+  proxy_front:
+    driver: bridge
+  proxy_back:
+    driver: bridge
+  proxy_proxy:
+    driver: bridge

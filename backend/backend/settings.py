@@ -16,7 +16,11 @@ DEBUG = os.getenv(
 
 SITE_ID = 1
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '192.168.1.52',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -54,10 +58,12 @@ CORS_ALLOW_HEADERS = default_headers + (
 )
 CORS_ORIGIN_WHITELIST = [
     'http://localhost',
+    'http://127.0.0.1',
+    'http://192.168.1.52',
 ]
-CORS_ORIGIN_ALLOW_ALL = True
-# CORS_ALLOW_CREDENTIALS = True
+# CORS_ORIGIN_ALLOW_ALL = True
 # CORS_URLS_REGEX = r'^/api/.*$'
+# CSRF_TRUSTED_ORIGINS = ['*']
 
 DJOSER = {
     'SEND_ACTIVATION_EMAIL': False,
