@@ -62,5 +62,3 @@ networks:
     driver: bridge
   proxy_back:
     driver: bridge
-  proxy_proxy:
-    driver: bridge
