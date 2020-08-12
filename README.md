@@ -48,6 +48,8 @@ https://docs.docker.com/engine/install/
     - EMAIL_HOST_USER=`***`@yandex.com
     - EMAIL_HOST_PASSWORD=`***`
 
+3. В файлах в папке `proxy/` указать `server_name`.
+
 ### Создание миграции, регистрация суперпользователя
 
     docker-compose run backend python manage.py makemigrations
