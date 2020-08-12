@@ -48,7 +48,9 @@ https://docs.docker.com/engine/install/
     - EMAIL_HOST_USER=`***`@yandex.com
     - EMAIL_HOST_PASSWORD=`***`
 
-3. В файлах в папке `proxy/` указать `server_name`.
+3. В файле `backend/backend/settings.py` в списках `ALLOWED_HOSTS` и `CORS_ORIGIN_WHITELIST` указать необходимый хост.
+
+4. В файлах в папке `proxy/` указать `server_name`.
 
 ### Создание миграции, регистрация суперпользователя
 
